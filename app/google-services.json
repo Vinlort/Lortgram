@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "493336524090",
+    "firebase_url": "https://kotlinmessenger-30731-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "kotlinmessenger-30731",
+    "storage_bucket": "kotlinmessenger-30731.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493336524090:android:8cda0dd403311ab3750c03",
+        "android_client_info": {
+          "package_name": "com.vinlort.mychatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493336524090-dum2j60t1tl68kjjvceu7kvugkpv7b7b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbaf3G-bLIOzj-Nmi-qnE_Pp_FiWJgFIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493336524090-dum2j60t1tl68kjjvceu7kvugkpv7b7b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
