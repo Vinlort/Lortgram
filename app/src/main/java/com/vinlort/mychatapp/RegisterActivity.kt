@@ -19,7 +19,7 @@ import java.util.UUID
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-    var selectedPhotoUri: Uri? = null
+    private var selectedPhotoUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
@@ -43,9 +43,8 @@ class RegisterActivity : AppCompatActivity() {
                 Log.d("RegisterActivity", "Photo was selected")
                 selectedPhotoUri = result.data!!.data
                 val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
-                val bitmapDrawable = BitmapDrawable(bitmap)
-                binding.selectPhotoRegister.setBackgroundDrawable(bitmapDrawable)
-                binding.selectPhotoRegister.text = ""
+                binding.selectPhotoRegisterImg.setImageBitmap(bitmap)
+                binding.selectPhotoRegister.alpha = 0f
             }
         }
 
@@ -53,7 +52,6 @@ class RegisterActivity : AppCompatActivity() {
             Log.d("RegisterActivity", "Try to show photo selector")
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
-            //startActivityForResult(intent, 0)
             activityResultLauncher.launch(intent)
         }
 
@@ -80,7 +78,6 @@ class RegisterActivity : AppCompatActivity() {
                 Log.d("RegisterActivity", "Failed to create user: ${it.message}")
                 Toast.makeText(this, "Failed to create user: ${it.message}", Toast.LENGTH_SHORT).show()
             }
-
     }
     private  fun  uploadImageToFirebaseStorage(){
         if (selectedPhotoUri == null) return
@@ -94,7 +91,6 @@ class RegisterActivity : AppCompatActivity() {
                 ref.downloadUrl.addOnSuccessListener {
                     it.toString()
                     Log.d("RegisterActivity", "File location: $it")
-
                     saveUserToFirebaseDatabase(it.toString())
                 }
             }
