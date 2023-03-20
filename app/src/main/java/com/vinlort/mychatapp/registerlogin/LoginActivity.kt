@@ -1,4 +1,4 @@
-package com.vinlort.mychatapp
+package com.vinlort.mychatapp.registerlogin
 
 import android.content.Intent
 import android.os.Bundle

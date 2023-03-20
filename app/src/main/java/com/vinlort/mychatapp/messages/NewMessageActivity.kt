@@ -1,5 +1,6 @@
 package com.vinlort.mychatapp
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +12,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.squareup.picasso.Picasso
 import com.vinlort.mychatapp.databinding.ActivityNewMessageBinding
+import com.vinlort.mychatapp.messages.ChatLogActivity
+import com.vinlort.mychatapp.models.User
 import com.xwray.groupie.GroupieAdapter
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
@@ -28,6 +31,10 @@ class NewMessageActivity : AppCompatActivity() {
 
         fetchUsers()
     }
+
+    companion object{
+        val USER_KEY = "USER_KEY"
+    }
     private fun fetchUsers(){
         val ref = FirebaseDatabase.getInstance().getReference("/users")
         ref.addListenerForSingleValueEvent(object: ValueEventListener{
@@ -40,6 +47,13 @@ class NewMessageActivity : AppCompatActivity() {
                     if (user != null){
                         adapter.add(UserItem(user))
                     }
+                }
+                adapter.setOnItemClickListener { item, view ->
+                    val userItem = item as UserItem
+                    val intent = Intent(view.context,ChatLogActivity::class.java)
+                    intent.putExtra(USER_KEY ,userItem.user.username)
+                    startActivity(intent)
+                    finish()
                 }
                 binding.recyclerViewNewMessage.adapter = adapter
             }

@@ -1,7 +1,6 @@
 package com.vinlort.mychatapp
 
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -11,9 +10,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.vinlort.mychatapp.databinding.ActivityRegisterBinding
+import com.vinlort.mychatapp.messages.LatestMessagesActivity
+import com.vinlort.mychatapp.models.User
+import com.vinlort.mychatapp.registerlogin.LoginActivity
 import java.util.UUID
 
 
@@ -113,8 +114,4 @@ class RegisterActivity : AppCompatActivity() {
             }
 
     }
-}
-
-class User(val uid: String, val username: String, val profileImageUrl: String){
-    constructor(): this("","","")
 }

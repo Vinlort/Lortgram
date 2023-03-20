@@ -1,4 +1,4 @@
-package com.vinlort.mychatapp
+package com.vinlort.mychatapp.messages
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.vinlort.mychatapp.NewMessageActivity
+import com.vinlort.mychatapp.R
+import com.vinlort.mychatapp.RegisterActivity
 import com.vinlort.mychatapp.databinding.ActivityLatestMessagesBinding
 
 class LatestMessagesActivity : AppCompatActivity() {
