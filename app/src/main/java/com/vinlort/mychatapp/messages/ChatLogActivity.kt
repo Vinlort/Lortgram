@@ -1,9 +1,11 @@
 package com.vinlort.mychatapp.messages
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import com.squareup.picasso.Picasso
+import com.vinlort.mychatapp.NewMessageActivity
 import com.vinlort.mychatapp.R
 import com.vinlort.mychatapp.databinding.ActivityChatLogBinding
 import com.vinlort.mychatapp.models.User
@@ -19,7 +21,16 @@ class ChatLogActivity : AppCompatActivity() {
         binding = ActivityChatLogBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "Chat Log"
+        //val username = intent.getStringExtra(NewMessageActivity.USER_KEY)
+        //val user2 = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
+
+        val user = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(NewMessageActivity.USER_KEY, User::class.java)
+        } else {
+            intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
+        }
+        supportActionBar?.title = user?.username
+
         val adapter = GroupieAdapter()
 
         adapter.add(ChatFromItem())
