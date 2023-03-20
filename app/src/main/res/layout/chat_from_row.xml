@@ -17,11 +17,11 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintStart_toEndOf="@+id/imageview_chat_from_row"
+        app:layout_constraintTop_toTopOf="@+id/imageview_chat_from_row" />
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imageView"
+        android:id="@+id/imageview_chat_from_row"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
