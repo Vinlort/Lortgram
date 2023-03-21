@@ -37,7 +37,6 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-
         var activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -55,7 +54,6 @@ class RegisterActivity : AppCompatActivity() {
             intent.type = "image/*"
             activityResultLauncher.launch(intent)
         }
-
     }
 
     private fun performRegister(){
@@ -73,6 +71,7 @@ class RegisterActivity : AppCompatActivity() {
                 if (!it.isSuccessful) return@addOnCompleteListener
                 // else if successful
                 Log.d("RegisterActivity", "Created user with uid: ${it.result.user?.uid}")
+
                 uploadImageToFirebaseStorage()
             }
             .addOnFailureListener{
@@ -81,7 +80,48 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
     private  fun  uploadImageToFirebaseStorage(){
-        if (selectedPhotoUri == null) return
+
+        // Перевірка, чи вибрав користувач зображення
+        if (selectedPhotoUri == null) {
+            // Отримання посилання на стандартне зображення з Firebase Storage
+            val defaultImageRef = FirebaseStorage.getInstance().getReference("/default/Sample_User_Icon.png")
+            defaultImageRef.downloadUrl.addOnSuccessListener { uri ->
+                // Збереження посилання на стандартне зображення у базі даних Firebase
+                saveUserToFirebaseDatabase(uri.toString())
+            }.addOnFailureListener {
+                // Обробка помилки
+            }
+        } else {
+            // Завантаження вибраного зображення
+            val filename = UUID.randomUUID().toString()
+            val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+            ref.putFile(selectedPhotoUri!!)
+                .addOnSuccessListener {
+                    Log.d("RegisterActivity", "Succesfully uploaded image: ${it.metadata?.path}")
+
+                    ref.downloadUrl.addOnSuccessListener {
+                        it.toString()
+                        Log.d("RegisterActivity", "File location: $it")
+                        saveUserToFirebaseDatabase(it.toString())
+                    }
+                }
+                .addOnFailureListener{
+                    // Обробка помилки
+                }
+        }
+
+        /*if (selectedPhotoUri == null) {
+            val storageRef = FirebaseStorage.getInstance().getReference("/default/Sample_User_Icon.png")
+            storageRef.downloadUrl.addOnSuccessListener {
+                val defaultImageUri= it
+                selectedPhotoUri = defaultImageUri
+            }
+                .addOnFailureListener{
+                    Log.d("DefaultImg", "Fail")
+                }
+        }
+
         val filename = UUID.randomUUID().toString()
         val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
 
@@ -97,7 +137,7 @@ class RegisterActivity : AppCompatActivity() {
             }
             .addOnFailureListener{
                 //logs
-            }
+            }*/
     }
 
     private fun saveUserToFirebaseDatabase(profileImageUrl: String){
