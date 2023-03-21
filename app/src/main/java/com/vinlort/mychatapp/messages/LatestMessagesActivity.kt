@@ -5,22 +5,34 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.squareup.picasso.Picasso
 import com.vinlort.mychatapp.NewMessageActivity
 import com.vinlort.mychatapp.R
 import com.vinlort.mychatapp.RegisterActivity
+import com.vinlort.mychatapp.UserItem
 import com.vinlort.mychatapp.databinding.ActivityLatestMessagesBinding
+import com.vinlort.mychatapp.models.ChatMessage
 import com.vinlort.mychatapp.models.User
+import com.vinlort.mychatapp.views.LatestMessageRow
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.GroupieViewHolder
+import com.xwray.groupie.Item
 
 class LatestMessagesActivity : AppCompatActivity() {
 
     companion object {
         var currentUser: User? = null
+        val TAG = "LatestMessages"
     }
 
     private lateinit var binding: ActivityLatestMessagesBinding
@@ -30,11 +42,62 @@ class LatestMessagesActivity : AppCompatActivity() {
 
         binding = ActivityLatestMessagesBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.recyclerviewLatestMessages.adapter = adapter
+        binding.recyclerviewLatestMessages.addItemDecoration(DividerItemDecoration(this,DividerItemDecoration.VERTICAL))
+
+        // set item click listener on adapter
+        adapter.setOnItemClickListener { item, view ->
+            Log.d(TAG, "Click on adapter item")
+
+            val intent = Intent(this, ChatLogActivity::class.java)
+            val row = item as LatestMessageRow
+            intent.putExtra(NewMessageActivity.USER_KEY, row.chatPartnerUser)
+            startActivity(intent)
+        }
+
+        listenForLatestMessages()
 
         fetchUser()
 
         verifyUserIsLoggedIn()
     }
+
+    val latestMessagesMap = HashMap<String, ChatMessage>()
+
+    private fun refreshRecyclerViewMessages(){
+        adapter.clear()
+        latestMessagesMap.values.forEach{
+            adapter.add(LatestMessageRow(it))
+        }
+    }
+
+    private  fun listenForLatestMessages(){
+        val fromId = FirebaseAuth.getInstance().uid
+        val ref = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId")
+        ref.addChildEventListener(object: ChildEventListener{
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+                val chatMessage = p0.getValue(ChatMessage::class.java) ?: return
+                latestMessagesMap[p0.key!!] = chatMessage
+                refreshRecyclerViewMessages()
+            }
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                val chatMessage = p0.getValue(ChatMessage::class.java) ?: return
+                latestMessagesMap[p0.key!!] = chatMessage
+                refreshRecyclerViewMessages()
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+
+            }
+            override fun onChildRemoved(p0: DataSnapshot) {
+
+            }
+        })
+    }
+    val adapter = GroupAdapter<GroupieViewHolder>()
 
     private fun fetchUser() {
         val uid = FirebaseAuth.getInstance().uid

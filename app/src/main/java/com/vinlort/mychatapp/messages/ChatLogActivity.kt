@@ -72,7 +72,7 @@ class ChatLogActivity : AppCompatActivity() {
                         adapter.add(ChatFromItem(chatMessage.text, currentUser!!))
                     }
                 }
-
+                binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
             }
 
             override fun onCancelled(p0: DatabaseError) {
@@ -124,6 +124,12 @@ class ChatLogActivity : AppCompatActivity() {
             }
 
         toReference.setValue(chatMessage)
+
+        val latestMessageRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")
+        latestMessageRef.setValue(chatMessage)
+
+        val latestMessageToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
+        latestMessageToRef.setValue(chatMessage)
     }
 }
 
@@ -151,8 +157,7 @@ class ChatToItem(val text: String, val user: User) : Item<GroupieViewHolder>() {
 
         //load user image
         val uri = user.profileImageUrl
-        val targetImageView =
-            viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
+        val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
         Picasso.get().load(uri).into(targetImageView)
     }
 
