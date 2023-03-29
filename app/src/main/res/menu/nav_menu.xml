@@ -4,9 +4,16 @@
 
     <item android:id="@+id/menu_new_message"
         android:title="New Message"
-        app:showAsAction="ifRoom"/>
-    <item android:id="@+id/menu_sign_out"
-        android:title="Sign Out"
+        android:icon="@drawable/new_message"
         app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/menu_user_settings"
+        android:title="User Settings"
+        android:icon="@drawable/user"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/menu_sign_out"
+        android:title="Sign Out"
+        android:icon="@drawable/logout"
+        app:showAsAction="ifRoom"/>
 </menu>

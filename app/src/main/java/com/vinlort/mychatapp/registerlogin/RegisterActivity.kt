@@ -90,7 +90,7 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to create user: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
-    private  fun  uploadImageToFirebaseStorage(){
+    private fun  uploadImageToFirebaseStorage(){
 
         // Перевірка, чи вибрав користувач зображення
         if (selectedPhotoUri == null) {

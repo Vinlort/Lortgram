@@ -1,17 +1,12 @@
 package com.vinlort.mychatapp.messages
 
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import com.vinlort.mychatapp.NewMessageActivity
 import com.vinlort.mychatapp.R
@@ -19,7 +14,6 @@ import com.vinlort.mychatapp.databinding.ActivityChatLogBinding
 import com.vinlort.mychatapp.models.ChatMessage
 import com.vinlort.mychatapp.models.User
 import com.xwray.groupie.GroupAdapter
-import com.xwray.groupie.GroupieAdapter
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
 
@@ -65,11 +59,11 @@ class ChatLogActivity : AppCompatActivity() {
                     Log.d(TAG, chatMessage.text)
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
-
-                        adapter.add(ChatToItem(chatMessage.text, toUser!!))
-                    } else {
                         val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatFromItem(chatMessage.text, currentUser!!))
+                        adapter.add(ChatToItem(chatMessage.text, currentUser!!))
+                    } else {
+                        //val currentUser = LatestMessagesActivity.currentUser
+                        adapter.add(ChatFromItem(chatMessage.text, toUser!!))
                     }
                 }
                 binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
@@ -165,4 +159,32 @@ class ChatToItem(val text: String, val user: User) : Item<GroupieViewHolder>() {
         return R.layout.chat_to_row
     }
 
+}
+class Chat1ToItem(val text: String, val currentUser: User) : Item<GroupieViewHolder>() {
+
+    override fun bind(viewHolder: GroupieViewHolder, position: Int) {
+        viewHolder.itemView.findViewById<TextView>(R.id.textview_to_row).text = text
+
+        //load user image
+        val uid = currentUser.uid
+        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(User::class.java)
+                if (user != null) {
+                    val uri = user.profileImageUrl
+                    val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
+                    Picasso.get().load(uri).into(targetImageView)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ChatToItem", "Failed to retrieve user data from Firebase: ${error.message}")
+            }
+        })
+    }
+
+    override fun getLayout(): Int {
+        return R.layout.chat_to_row
+    }
 }

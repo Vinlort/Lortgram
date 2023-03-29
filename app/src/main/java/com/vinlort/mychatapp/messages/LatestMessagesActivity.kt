@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.firebase.auth.FirebaseAuth
@@ -15,18 +13,16 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.squareup.picasso.Picasso
 import com.vinlort.mychatapp.NewMessageActivity
 import com.vinlort.mychatapp.R
 import com.vinlort.mychatapp.RegisterActivity
-import com.vinlort.mychatapp.UserItem
 import com.vinlort.mychatapp.databinding.ActivityLatestMessagesBinding
 import com.vinlort.mychatapp.models.ChatMessage
 import com.vinlort.mychatapp.models.User
+import com.vinlort.mychatapp.models.UserSettingsActivity
 import com.vinlort.mychatapp.views.LatestMessageRow
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import com.xwray.groupie.Item
 
 class LatestMessagesActivity : AppCompatActivity() {
 
@@ -136,10 +132,15 @@ class LatestMessagesActivity : AppCompatActivity() {
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
+            R.id.menu_user_settings -> {
+                val intent = Intent(this, UserSettingsActivity::class.java)
+                startActivity(intent)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
 
+    //menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.nav_menu, menu)
         return super.onCreateOptionsMenu(menu)
