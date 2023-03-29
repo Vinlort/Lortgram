@@ -91,6 +91,7 @@ class ChatLogActivity : AppCompatActivity() {
         //send message to firebase db
 
         val textForMassage = binding.edittextChatLog.text.toString()
+        if (textForMassage == "") return
         val fromId = FirebaseAuth.getInstance().uid
         val user = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
 
@@ -159,32 +160,4 @@ class ChatToItem(val text: String, val user: User) : Item<GroupieViewHolder>() {
         return R.layout.chat_to_row
     }
 
-}
-class Chat1ToItem(val text: String, val currentUser: User) : Item<GroupieViewHolder>() {
-
-    override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        viewHolder.itemView.findViewById<TextView>(R.id.textview_to_row).text = text
-
-        //load user image
-        val uid = currentUser.uid
-        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.getValue(User::class.java)
-                if (user != null) {
-                    val uri = user.profileImageUrl
-                    val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
-                    Picasso.get().load(uri).into(targetImageView)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("ChatToItem", "Failed to retrieve user data from Firebase: ${error.message}")
-            }
-        })
-    }
-
-    override fun getLayout(): Int {
-        return R.layout.chat_to_row
-    }
 }
