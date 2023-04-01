@@ -2,6 +2,7 @@ package com.vinlort.mychatapp.messages
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,7 +17,11 @@ import com.vinlort.mychatapp.models.User
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
+import java.security.SecureRandom
 
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 class ChatLogActivity : AppCompatActivity() {
 
@@ -26,6 +31,7 @@ class ChatLogActivity : AppCompatActivity() {
 
     val adapter = GroupAdapter<GroupieViewHolder>()
     var toUser: User? = null
+
 
     private lateinit var binding: ActivityChatLogBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,13 +63,16 @@ class ChatLogActivity : AppCompatActivity() {
 
                 if (chatMessage != null) {
                     Log.d(TAG, chatMessage.text)
+                    val strKeyAES = Base64.decode(chatMessage.keyAES, Base64.DEFAULT)
+                    val strIV = Base64.decode(chatMessage.iv, Base64.DEFAULT)
+                    val decrMessage = decrypt(chatMessage.text,strKeyAES,strIV)
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
                         val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatToItem(chatMessage.text, currentUser!!))
+                        adapter.add(ChatToItem(decrMessage, currentUser!!))
                     } else {
                         //val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatFromItem(chatMessage.text, toUser!!))
+                        adapter.add(ChatFromItem(decrMessage, toUser!!))
                     }
                 }
                 binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
@@ -87,11 +96,29 @@ class ChatLogActivity : AppCompatActivity() {
         })
     }
 
+    private fun encrypt(textToEncrypt: String, keyString: ByteArray, ivString: ByteArray): String {
+        val key = SecretKeySpec(keyString, "AES")
+        val iv = IvParameterSpec(ivString)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        cipher.init(Cipher.ENCRYPT_MODE, key, iv)
+        val encryptedBytes = cipher.doFinal(textToEncrypt.toByteArray(Charsets.UTF_8))
+        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
+    }
+
+    fun decrypt(textToDecrypt: String, keyString: ByteArray, ivString: ByteArray): String {
+        val key = SecretKeySpec(keyString, "AES")
+        val iv = IvParameterSpec(ivString)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        cipher.init(Cipher.DECRYPT_MODE, key, iv)
+        val decryptedBytes = cipher.doFinal(Base64.decode(textToDecrypt, Base64.NO_WRAP))
+        return String(decryptedBytes, Charsets.UTF_8)
+    }
+
     private fun performSendMessage() {
         //send message to firebase db
 
-        val textForMassage = binding.edittextChatLog.text.toString()
-        if (textForMassage == "") return
+        val textForMessage = binding.edittextChatLog.text.toString()
+        if (textForMessage == "") return
         val fromId = FirebaseAuth.getInstance().uid
         val user = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
 
@@ -99,17 +126,28 @@ class ChatLogActivity : AppCompatActivity() {
         if (fromId == null) return
         if (toId == null) return
 
+        val random = SecureRandom()
+        val keyAES = ByteArray(16)
+        val iv = ByteArray(16)
+        random.nextBytes(keyAES)
+        random.nextBytes(iv)
+        val encMessage = encrypt(textForMessage,keyAES,iv)
+
         val reference = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId/$toId").push()
 
         val toReference = FirebaseDatabase.getInstance().getReference("/user-messages/$toId/$fromId").push()
 
+        val strKeyAES = Base64.encodeToString(keyAES, Base64.DEFAULT)
+        val strIV = Base64.encodeToString(iv, Base64.DEFAULT)
 
         val chatMessage = ChatMessage(
             reference.key!!,
-            textForMassage,
+            encMessage,
             fromId,
             toId,
-            System.currentTimeMillis() / 1000
+            System.currentTimeMillis() / 1000,
+            strKeyAES,
+            strIV
         )
         reference.setValue(chatMessage)
             .addOnSuccessListener {

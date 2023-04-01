@@ -1,5 +1,6 @@
 package com.vinlort.mychatapp.views
 
+import android.util.Base64
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
@@ -13,11 +14,17 @@ import com.vinlort.mychatapp.models.ChatMessage
 import com.vinlort.mychatapp.models.User
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 class LatestMessageRow(val chatMessage: ChatMessage): Item<GroupieViewHolder>(){
     var chatPartnerUser: User? = null
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        viewHolder.itemView.findViewById<TextView>(R.id.textview_latestmessage_latest_message_row).text = chatMessage.text
+        val strKeyAES = Base64.decode(chatMessage.keyAES, Base64.DEFAULT)
+        val strIV = Base64.decode(chatMessage.iv, Base64.DEFAULT)
+        val decrMessage = decrypt(chatMessage.text,strKeyAES,strIV)
+        viewHolder.itemView.findViewById<TextView>(R.id.textview_latestmessage_latest_message_row).text = decrMessage
         val chatPartnerId: String
         if (chatMessage.fromId == FirebaseAuth.getInstance().uid){
             chatPartnerId = chatMessage.toId
@@ -37,6 +44,15 @@ class LatestMessageRow(val chatMessage: ChatMessage): Item<GroupieViewHolder>(){
 
             }
         })
+
+    }
+    fun decrypt(textToDecrypt: String, keyString: ByteArray, ivString: ByteArray): String {
+        val key = SecretKeySpec(keyString, "AES")
+        val iv = IvParameterSpec(ivString)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        cipher.init(Cipher.DECRYPT_MODE, key, iv)
+        val decryptedBytes = cipher.doFinal(Base64.decode(textToDecrypt, Base64.NO_WRAP))
+        return String(decryptedBytes, Charsets.UTF_8)
     }
     override fun getLayout(): Int {
         return R.layout.latest_message_row
