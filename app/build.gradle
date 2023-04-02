@@ -51,6 +51,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.68'
     implementation 'com.google.firebase:firebase-firestore-ktx:23.0.3'
+    implementation 'com.google.firebase:firebase-messaging:22.0.0'
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
