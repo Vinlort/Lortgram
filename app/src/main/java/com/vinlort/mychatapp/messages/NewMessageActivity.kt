@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -51,7 +52,6 @@ class NewMessageActivity : AppCompatActivity() {
                 adapter.setOnItemClickListener { item, view ->
                     val userItem = item as UserItem
                     val intent = Intent(view.context,ChatLogActivity::class.java)
-                    //intent.putExtra(USER_KEY ,userItem.user.username)
                     intent.putExtra(USER_KEY, userItem.user)
                     startActivity(intent)
                     finish()
@@ -69,8 +69,14 @@ class NewMessageActivity : AppCompatActivity() {
 class UserItem(val user: User): Item<GroupieViewHolder>() {
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        viewHolder.itemView.findViewById<TextView>(R.id.username_textview_new_message).text = user.username
-        Picasso.get().load(user.profileImageUrl).into(viewHolder.itemView.findViewById<ImageView>(R.id.imageview_new_message))
+        if(user.uid == FirebaseAuth.getInstance().uid){
+            viewHolder.itemView.findViewById<TextView>(R.id.username_textview_new_message).text = "My Notes"
+            val drawableResId = R.drawable.mynotes
+            Picasso.get().load(drawableResId).into(viewHolder.itemView.findViewById<ImageView>(R.id.imageview_new_message))
+        } else {
+            viewHolder.itemView.findViewById<TextView>(R.id.username_textview_new_message).text = user.username
+            Picasso.get().load(user.profileImageUrl).into(viewHolder.itemView.findViewById<ImageView>(R.id.imageview_new_message))
+        }
     }
     override fun getLayout():Int {
         return R.layout.user_row_new_message

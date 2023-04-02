@@ -6,8 +6,10 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.messaging.FirebaseMessaging
 import com.squareup.picasso.Picasso
 import com.vinlort.mychatapp.NewMessageActivity
 import com.vinlort.mychatapp.R
@@ -42,7 +44,12 @@ class ChatLogActivity : AppCompatActivity() {
 
         toUser = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
 
-        supportActionBar?.title = toUser?.username
+        if (toUser?.uid == FirebaseAuth.getInstance().uid){
+            supportActionBar?.title = "My Notes"
+        }
+        else{
+            supportActionBar?.title = toUser?.username
+        }
         //setupDummyData()
         listenForMessages()
 
@@ -51,6 +58,8 @@ class ChatLogActivity : AppCompatActivity() {
             performSendMessage()
         }
     }
+
+    private val addedMessageIds = mutableSetOf<String>()
 
     private fun listenForMessages() {
         val fromId = FirebaseAuth.getInstance().uid
@@ -61,7 +70,7 @@ class ChatLogActivity : AppCompatActivity() {
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                 val chatMessage = p0.getValue(ChatMessage::class.java)
 
-                if (chatMessage != null) {
+                if (chatMessage != null && chatMessage.id !in addedMessageIds) {
                     Log.d(TAG, chatMessage.text)
                     val strKeyAES = Base64.decode(chatMessage.keyAES, Base64.DEFAULT)
                     val strIV = Base64.decode(chatMessage.iv, Base64.DEFAULT)
@@ -70,13 +79,14 @@ class ChatLogActivity : AppCompatActivity() {
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
                         val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatToItem(decrMessage, currentUser!!, timeStr))
+                        val state: Boolean = chatMessage.toId == FirebaseAuth.getInstance().uid
+                        adapter.add(ChatToItem(decrMessage, currentUser!!, timeStr, state))
                     } else {
-                        //val currentUser = LatestMessagesActivity.currentUser
                         adapter.add(ChatFromItem(decrMessage, toUser!!, timeStr))
                     }
+                    addedMessageIds.add(chatMessage.id)
+                    binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
                 }
-                binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
             }
 
             override fun onCancelled(p0: DatabaseError) {
@@ -183,10 +193,18 @@ class ChatFromItem(val text: String, val user: User, val timeStr: String) : Item
         viewHolder.itemView.findViewById<TextView>(R.id.textview_from_row).text = text
         viewHolder.itemView.findViewById<TextView>(R.id.textview_time_from_row).text = timeStr
 
-        val uri = user.profileImageUrl
-        val targetImageView =
-            viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_from_row)
-        Picasso.get().load(uri).into(targetImageView)
+        if (user.uid == FirebaseAuth.getInstance().uid){
+            val targetImageView =
+                viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_from_row)
+            val drawableResId = R.drawable.mynotes
+            Picasso.get().load(drawableResId).into(targetImageView)
+        } else {
+            val uri = user.profileImageUrl
+            val targetImageView =
+                viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_from_row)
+            Picasso.get().load(uri).into(targetImageView)
+        }
+
     }
 
     override fun getLayout(): Int {
@@ -195,16 +213,24 @@ class ChatFromItem(val text: String, val user: User, val timeStr: String) : Item
 
 }
 
-class ChatToItem(val text: String, val user: User, val timeStr: String) : Item<GroupieViewHolder>() {
+class ChatToItem(val text: String, val user: User, val timeStr: String, val state: Boolean) : Item<GroupieViewHolder>() {
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.itemView.findViewById<TextView>(R.id.textview_to_row).text = text
         viewHolder.itemView.findViewById<TextView>(R.id.textview_time_to_row).text = timeStr
 
-        //load user image
-        val uri = user.profileImageUrl
-        val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
-        Picasso.get().load(uri).into(targetImageView)
+        if (state){
+            val targetImageView =
+                viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
+            val drawableResId = R.drawable.mynotes
+            Picasso.get().load(drawableResId).into(targetImageView)
+
+        } else {
+            val uri = user.profileImageUrl
+            val targetImageView =
+                viewHolder.itemView.findViewById<ImageView>(R.id.imageview_chat_to_row)
+            Picasso.get().load(uri).into(targetImageView)
+        }
     }
 
     override fun getLayout(): Int {

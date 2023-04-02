@@ -77,6 +77,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         // Firebase
+
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener {
                 if (!it.isSuccessful) return@addOnCompleteListener
@@ -92,18 +93,13 @@ class RegisterActivity : AppCompatActivity() {
     }
     private fun  uploadImageToFirebaseStorage(){
 
-        // Перевірка, чи вибрав користувач зображення
         if (selectedPhotoUri == null) {
-            // Отримання посилання на стандартне зображення з Firebase Storage
             val defaultImageRef = FirebaseStorage.getInstance().getReference("/default/Sample_User_Icon.png")
             defaultImageRef.downloadUrl.addOnSuccessListener { uri ->
-                // Збереження посилання на стандартне зображення у базі даних Firebase
                 saveUserToFirebaseDatabase(uri.toString())
             }.addOnFailureListener {
-                // Обробка помилки
             }
         } else {
-            // Завантаження вибраного зображення
             val filename = UUID.randomUUID().toString()
             val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
 
@@ -118,7 +114,6 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener{
-                    // Обробка помилки
                 }
         }
     }

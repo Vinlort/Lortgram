@@ -58,13 +58,15 @@ class LatestMessagesActivity : AppCompatActivity() {
         verifyUserIsLoggedIn()
     }
 
-    val latestMessagesMap = HashMap<String, ChatMessage>()
+    var latestMessagesMap = HashMap<String, ChatMessage>()
 
     private fun refreshRecyclerViewMessages(){
         adapter.clear()
-        latestMessagesMap.values.forEach{
-            adapter.add(LatestMessageRow(it))
-        }
+        latestMessagesMap.values
+            .sortedByDescending { it.timestamp }
+            .forEach {
+                adapter.add(LatestMessageRow(it))
+            }
     }
 
     private  fun listenForLatestMessages(){
@@ -121,7 +123,7 @@ class LatestMessagesActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item?.itemId) {
+        when (item.itemId) {
             R.id.menu_new_message -> {
                 val intent = Intent(this, NewMessageActivity::class.java)
                 startActivity(intent)

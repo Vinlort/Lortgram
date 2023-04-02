@@ -1,5 +1,6 @@
 package com.vinlort.mychatapp.views
 
+import android.net.Uri
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -62,9 +63,17 @@ class LatestMessageRow(val chatMessage: ChatMessage): Item<GroupieViewHolder>(){
         ref.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 chatPartnerUser = p0.getValue(User::class.java)
-                viewHolder.itemView.findViewById<TextView>(R.id.textview_username_latest_message_row).text = chatPartnerUser?.username
-                val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_latest_message_row)
-                Picasso.get().load(chatPartnerUser?.profileImageUrl).into(targetImageView)
+                if (chatPartnerUser?.uid == FirebaseAuth.getInstance().uid){
+                    viewHolder.itemView.findViewById<TextView>(R.id.textview_username_latest_message_row).text = "My Notes"
+                    val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_latest_message_row)
+                    val drawableResId = R.drawable.mynotes
+                    Picasso.get().load(drawableResId).into(targetImageView)
+
+                } else {
+                    viewHolder.itemView.findViewById<TextView>(R.id.textview_username_latest_message_row).text = chatPartnerUser?.username
+                    val targetImageView = viewHolder.itemView.findViewById<ImageView>(R.id.imageview_latest_message_row)
+                    Picasso.get().load(chatPartnerUser?.profileImageUrl).into(targetImageView)
+                }
                 val timeStr = setTime(chatMessage.timestamp)
                 viewHolder.itemView.findViewById<TextView>(R.id.textview_time_row).text = timeStr
             }
