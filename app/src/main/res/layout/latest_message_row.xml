@@ -3,15 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="120dp">
+    android:layout_height="130dp"
+    android:background="@color/white">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageview_latest_message_row"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_marginStart="24dp"
-        app:civ_border_color="@color/black"
-        app:civ_border_width="4dp"
+        app:civ_border_color="@android:color/holo_blue_dark"
+        app:civ_border_width="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,6 +27,7 @@
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:padding="4dp"
         app:layout_constraintBottom_toTopOf="@+id/textview_latestmessage_latest_message_row"
         app:layout_constraintStart_toEndOf="@+id/imageview_latest_message_row"
         app:layout_constraintTop_toTopOf="parent"
@@ -40,8 +42,28 @@
         android:layout_marginEnd="24dp"
         android:text="Latest message"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/textview_time_row"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/imageview_latest_message_row"
         app:layout_constraintTop_toBottomOf="@+id/textview_username_latest_message_row" />
+
+    <TextView
+        android:id="@+id/textview_time_row"
+        android:layout_width="50dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/rounded_button"
+        android:gravity="center"
+        android:padding="2dp"
+        android:text="12:34"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageview_latest_message_row"
+        app:layout_constraintTop_toBottomOf="@+id/textview_latestmessage_latest_message_row" />
 </androidx.constraintlayout.widget.ConstraintLayout>

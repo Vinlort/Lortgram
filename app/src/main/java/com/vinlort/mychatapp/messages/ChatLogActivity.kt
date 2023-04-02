@@ -1,11 +1,11 @@
 package com.vinlort.mychatapp.messages
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
@@ -18,7 +18,7 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
 import java.security.SecureRandom
-
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -66,13 +66,14 @@ class ChatLogActivity : AppCompatActivity() {
                     val strKeyAES = Base64.decode(chatMessage.keyAES, Base64.DEFAULT)
                     val strIV = Base64.decode(chatMessage.iv, Base64.DEFAULT)
                     val decrMessage = decrypt(chatMessage.text,strKeyAES,strIV)
+                    val timeStr = setTime(chatMessage.timestamp)
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
                         val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatToItem(decrMessage, currentUser!!))
+                        adapter.add(ChatToItem(decrMessage, currentUser!!, timeStr))
                     } else {
                         //val currentUser = LatestMessagesActivity.currentUser
-                        adapter.add(ChatFromItem(decrMessage, toUser!!))
+                        adapter.add(ChatFromItem(decrMessage, toUser!!, timeStr))
                     }
                 }
                 binding.recyclerviewChatLog.scrollToPosition(adapter.itemCount -1)
@@ -164,12 +165,23 @@ class ChatLogActivity : AppCompatActivity() {
         val latestMessageToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
         latestMessageToRef.setValue(chatMessage)
     }
+
+    fun setTime(unixTime: Long): String{
+        val date = Date(unixTime * 1000L)
+        val calendar: Calendar = Calendar.getInstance()
+        calendar.setTime(date)
+        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute: Int = calendar.get(Calendar.MINUTE)
+        val time: String = "${hour.toString()}:${minute.toString()}"
+        return time
+    }
 }
 
-class ChatFromItem(val text: String, val user: User) : Item<GroupieViewHolder>() {
+class ChatFromItem(val text: String, val user: User, val timeStr: String) : Item<GroupieViewHolder>() {
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.itemView.findViewById<TextView>(R.id.textview_from_row).text = text
+        viewHolder.itemView.findViewById<TextView>(R.id.textview_time_from_row).text = timeStr
 
         val uri = user.profileImageUrl
         val targetImageView =
@@ -183,10 +195,11 @@ class ChatFromItem(val text: String, val user: User) : Item<GroupieViewHolder>()
 
 }
 
-class ChatToItem(val text: String, val user: User) : Item<GroupieViewHolder>() {
+class ChatToItem(val text: String, val user: User, val timeStr: String) : Item<GroupieViewHolder>() {
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.itemView.findViewById<TextView>(R.id.textview_to_row).text = text
+        viewHolder.itemView.findViewById<TextView>(R.id.textview_time_to_row).text = timeStr
 
         //load user image
         val uri = user.profileImageUrl
